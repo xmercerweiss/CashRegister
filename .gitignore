@@ -31,6 +31,7 @@
 # Executables
 *.exe
 *.out
+*.bin
 *.app
 *.i*86
 *.x86_64
@@ -53,3 +54,7 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# All build files
+build/*
+build/
