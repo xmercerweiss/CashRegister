@@ -67,7 +67,7 @@ void test_currency_to_str_returns_formatted_str(void) {
 	for (int i = 0; i < TEST_VALS_LEN; i++) {
 		test_amount = VALID_CURRENCY_VALS[i];
 		expected_str = VALID_CURRENCY_STRS[i];
-		actual_str = currency_to_str(buffer, MAX_BUFFER_SIZE, test_amount);
+		actual_str = sprint_currency(buffer, MAX_BUFFER_SIZE, "%s", test_amount);
 		TEST_ASSERT_EQUAL_STRING(expected_str, actual_str);
 	}
 }

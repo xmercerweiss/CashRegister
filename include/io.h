@@ -8,6 +8,6 @@
 
 #define CURRENCY_SYM "$"
 
-char* currency_to_str(char*, size_t, Currency);
+char *sprint_currency(char*, size_t, char*, Currency);
 
 #endif
