@@ -35,6 +35,7 @@ static char *s_currency_to_str(Currency amount) {
 	return io_buffer;
 }
 
+// TODO begin currency input
 static Currency s_str_to_currency() {
 	return (Currency) 0;
 }
@@ -52,9 +53,10 @@ Insert the string representation of an amount of currency into a format string,
 @param len
 	The length of the output buffer
 @param format
-	A format string, as used in printf
+	A format string, as used in printf. Must include at least one instance of
+	%s, which will be replaced with the currency's str representation
 @param amount
-	The amount of currency to be represented
+	The amount of currency to be represented as a str
 @return 
 	A pointer to the output buffer
 */
@@ -64,3 +66,32 @@ char *sprint_currency(char *out, size_t len, char *format, Currency amount) {
 	return out;
 }
 
+/**
+Print the string representation of an amount of currency to a file stream
+@param file
+	A pointer to the file stream to which the output will be printed
+@param format
+	A format string, as used in printf. Must include at least one instance of
+	%s, which will be replaced with the currency's str representation
+@param amount
+	The amount of currency to be represented as a str
+@return
+	A pointer to the output file stream
+*/		
+FILE *fprint_currency(FILE *file, char *format, Currency amount) {
+	char *currency_str = s_currency_to_str(amount);
+	fprintf(file, format, currency_str);
+	return file;
+}
+/**
+Print the string representation of an amount of currency to stdout
+@param format
+	A format string, as used in printf. Must include at least one instance of
+	%s, which will be replaced with the currency's str representation
+@param amount
+	The amount of currency to be represented as a str
+*/		
+
+void print_currency(char *format, Currency amount) {
+	fprint_currency(stdout, format, amount);
+}

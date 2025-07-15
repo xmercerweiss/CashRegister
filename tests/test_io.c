@@ -8,6 +8,7 @@
 
 static char buffer[MAX_BUFFER_SIZE];
 
+// TODO Replace separate test data arrays with 1 array of structs
 static Currency VALID_CURRENCY_VALS[] = {
  		  	0,
 	        1,
@@ -39,6 +40,7 @@ static void s_init(void) {
 	// Locale must be set for allowance of %'d format specifier used in io.h
 	setlocale(LC_NUMERIC, "");
 
+	// TODO Move data validation into separate function
 	// Verify that all test data arrays have the same size
 	int test_strs_len = sizeof(VALID_CURRENCY_STRS) / sizeof(void*);
 	if (test_strs_len < TEST_VALS_LEN) { 
@@ -59,7 +61,7 @@ void tearDown(void) {
 	
 }
 
-void test_currency_to_str_returns_formatted_str(void) {
+void test_sprint_currency_returns_formatted_str(void) {
 	Currency test_amount;
 	char *expected_str;
 	char *actual_str;
@@ -72,10 +74,26 @@ void test_currency_to_str_returns_formatted_str(void) {
 	}
 }
 
+void test_fprint_currency_prints_formatted_str(void) {
+	Currency test_amount;
+	char *expected_str;
+	char *actual_str;
+	FILE *test_file = fopen()
+	// TODO finish this test T_T
+
+	for (int i = 0; i < TEST_VALS_LEN; i++) {
+		test_amount = VALID_CURRENCY_VALS[i];
+		expected_str = VALID_CURRENCY_STRS[i];
+		fprint_currency(test_file, "%s", test_amount);
+		TEST_ASSERT_EQUAL_STRING(expected_str, actual_str);
+	}
+}
+
 int main(void) {
 	s_init();
 	UNITY_BEGIN();
-	RUN_TEST(test_currency_to_str_returns_formatted_str);
+	RUN_TEST(test_sprint_currency_returns_formatted_str);
+	RUN_TEST(test_fprint_currency_prints_formatted_str);
 	return UNITY_END();
 }
 

@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "utils.h"
 
 
@@ -9,5 +11,7 @@
 #define CURRENCY_SYM "$"
 
 char *sprint_currency(char*, size_t, char*, Currency);
+FILE *fprint_currency(FILE*, char*, Currency);
+void print_currency(char*, currency);
 
 #endif
