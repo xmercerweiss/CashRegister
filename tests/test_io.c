@@ -7,8 +7,9 @@
 #include "io.h"
 
 
-#define NULL_DATUM {0, NULL}
-#define INV_CURR   0
+#define NULL_DATUM    {0, NULL}
+#define INV_PERCENT   0
+#define INV_CURR      0
 
 
 static const TestDatum VALID_CURR_INPS[] = {
@@ -68,6 +69,60 @@ static const TestDatum INVALID_CURR_INPS[] = {
 	{INV_CURR, "127.0.0.1"},
 	{INV_CURR, "$5,000.37"},
 	{INV_CURR, "$1,005,000.37"},
+	NULL_DATUM
+};
+
+static const TestDatum VALID_PERCENT_INPS[] = {
+	{0, "0%"},
+	{1, "1%"},
+	{5, "5%"},
+	{20, "20%"},
+	{100, "100%"},
+	{150, "150%"},
+	{1000, "1000%"},
+	{5000, "5000%"},
+	{1000000, "1000000%"},
+	NULL_DATUM
+};
+
+static const TestDatum INVALID_PERCENT_INPS[] = {
+	{INV_PERCENT, "01%"},
+	{INV_PERCENT, "-0%"},
+	{INV_PERCENT, "-1%"},
+	{INV_PERCENT, "100%"},
+	{INV_PERCENT, ".10%"},
+	{INV_PERCENT, "1.0%"},
+	{INV_PERCENT, "0.001%"},
+	{INV_PERCENT, "-0.111%"},
+	{INV_PERCENT, "%5"},
+	{INV_PERCENT, "%10"},
+	{INV_PERCENT, "5"},
+	{INV_PERCENT, "10"},
+	{INV_PERCENT, "100"},
+	{INV_PERCENT, "100f%"},
+	{INV_PERCENT, "f100%"},
+	{INV_PERCENT, "O.1%"},
+	{INV_PERCENT, "1,000%"},
+	{INV_PERCENT, "1,000,000%"},
+	{INV_PERCENT, "1,1%"},
+	{INV_PERCENT, "1,%"},
+	{INV_PERCENT, ",0%"},
+	{INV_PERCENT, "%"},
+	{INV_PERCENT, "-1000%"},
+	{INV_PERCENT, "-%"},
+	NULL_DATUM
+};
+
+static const TestDatum VALID_PERCENT_OUTS[] = {
+	{0, "0%"},
+	{1, "1%"},
+	{5, "5%"},
+	{20, "20%"},
+	{100, "100%"},
+	{150, "150%"},
+	{1000, "1000%"},
+	{5000, "5000%"},
+	{1000000, "1000000%"},
 	NULL_DATUM
 };
 
@@ -135,13 +190,26 @@ void test_fscan_currency_returns_correct_value(void) {
 	}
 }
 
+void test_sprint_percent_returns_formatted_str(void) {
+	const TestDatum *datum;
+	char *returned;
+	for (datum = VALID_PERCENT_OUTS; datum->string != NULL; datum++) {
+		returned = sprint_percent(buffer, MAX_BUFFER_SIZE, "%s", datum->value);
+		TEST_ASSERT_EQUAL_STRING(datum->string, returned);
+	}
+}
+
 int main(void) {
 	s_init();
 	UNITY_BEGIN();
+	// Currency IO Tests
 	RUN_TEST(test_sprint_currency_returns_formatted_str);
 	RUN_TEST(test_sscan_currency_returns_correct_value);
 	RUN_TEST(test_sscan_currency_handles_invalid_strs);
 	RUN_TEST(test_fscan_currency_returns_correct_value);
+	// Percent IO Tests
+	RUN_TEST(test_sprint_currency_returns_formatted_str);
 	return UNITY_END();
 }
+
 

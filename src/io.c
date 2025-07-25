@@ -10,23 +10,26 @@
 #define INV_CURR 0
 
 
-/*
- * Shared Variables
- */
+/******
+ * Static Variables
+ ******/
 
 // Shared private buffer used for IO operations as needed
 static char io_buffer[MAX_BUFFER_SIZE];
 
 
-/*
+/******
  * Static Functions (marked with s_ prefix)
- */
+ ******/
 
-// Prototypes used by curr_to_str and str_to_curr
+// ****** Currency IO
+
+// *** Prototypes
 static Currency s_get_units(char**);
 static Currency s_get_cents(char**);
 static unsigned s_get_multiplier(char**);
 
+// *** Definitions
 // Convert an amount of currency into its str representation, then save it to the IO buffer
 static char *s_currency_to_str(Currency amount) {
 	uint64 unit_count = (uint64) (amount / 100);
@@ -102,10 +105,23 @@ static unsigned s_get_multiplier(char** pstr) {
 	return out;
 }
 
+// ***** Percentage IO
 
-/*
+// *** Prototypes
+
+// *** Definitions
+// Convert a percentage to its string representation
+char *s_percent_to_str(Percent percent) {
+	snprintf(io_buffer, MAX_BUFFER_SIZE, "%h%%", percent);
+	return io_buffer;
+}
+
+
+/******
  * Public Functions
- */
+ ******/
+
+// ***** Currency IO
 
 /**
 Insert the string representation of an amount of currency into a format string,
@@ -182,10 +198,72 @@ Scan a file stream for the string representation of a currency value,
 */
 Currency fscan_currency(FILE *in) {
 	// Generate a format specifying the maximum length of the IO buffer
-	char format[MIN_BUFFER_SIZE];
-	snprintf(format, MIN_BUFFER_SIZE, "%%%ds", MAX_BUFFER_SIZE-1);
+	char meta_format[MIN_BUFFER_SIZE];
+	snprintf(meta_format, MIN_BUFFER_SIZE, "%%%ds", MAX_BUFFER_SIZE-1);
 	// Use format to read from the input stream to the IO buffer
-	fscanf(in, format, &io_buffer);
+	fscanf(in, meta_format, &io_buffer);
 	return s_str_to_currency();
+}
+
+/**
+Scan stdin for the string representation of a currency value, then return that value
+@return
+	The currency value represented in stdin
+*/
+Currency scan_currency(void) {
+	return fscan_currency(stdin);
+}
+
+// ***** Percent IO
+
+/**
+Insert the string representation of a percentage into a format string, 
+	then place the result in a char buffer
+@param out
+	A pointer to the buffer where the final output is stored
+@param len
+	The length of the output buffer
+@param format
+	A format string, as used in printf. Must include at least one instance of
+	%s, which will be replaced with the percentage's str representation
+@param percent
+	The percentage to be represented as a str
+@return 
+	A pointer to the output buffer
+*/
+char *sprint_percent(char *out, size_t len, char *format, Percent percent) {
+	char *percent_str = s_percent_to_str(percent);
+	snprintf(out, len, format, percent_str);
+	return out;
+}
+
+/**
+Print the string representation of a percentage to a file stream
+@param file
+	A pointer to the file stream to which the output will be printed
+@param format
+	A format string, as used in printf. Must include at least one instance of
+	%s, which will be replaced with the percentage's str representation
+@param percent
+	The percentage to be represented as a str
+@return
+	A pointer to the output file stream
+*/
+FILE *fprint_percent(FILE *out, char *format, Percent percent) {
+	char *percent_str = s_percent_to_str(percent);
+	fprintf(out, format, percent_str);
+	return out;
+}
+
+/**
+Print the string representation of a percentage to stdout
+@param format
+	A format string, as used in printf. Must include at least one instance of
+	%s, which will be replaced with the percentage's str representation
+@param percent
+	The percentage to be represented as a str
+*/
+void print_percent(char *format, Percent percent) {
+	fprintf(stdout, format, percent);
 }
 
