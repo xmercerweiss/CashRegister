@@ -10,7 +10,7 @@
 // *** Type Definitions
 // Custom
 typedef unsigned long Currency;
-typedef unsigned short Percent;
+typedef unsigned int Percent;
 
 // Aliased
 typedef unsigned long  uint64;

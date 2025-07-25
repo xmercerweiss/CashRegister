@@ -7,7 +7,8 @@
 #include "utils.h"
 
 
-#define INV_CURR 0
+#define INV_CURR    0
+#define INV_PERCENT 0
 
 
 /******
@@ -112,8 +113,27 @@ static unsigned s_get_multiplier(char** pstr) {
 // *** Definitions
 // Convert a percentage to its string representation
 char *s_percent_to_str(Percent percent) {
-	snprintf(io_buffer, MAX_BUFFER_SIZE, "%h%%", percent);
+	snprintf(io_buffer, MAX_BUFFER_SIZE, "%u%%", percent);
 	return io_buffer;
+}
+
+// Convert the str in the IO buffer into the percentage it represents, if possible
+Percent s_str_to_percent(void) {
+	Percent out;
+	char *s = io_buffer;
+	int len;
+	// Skip whitespace
+	while (isspace(*s))
+		s++;
+	if (!isdigit(*s)) {
+		return INV_PERCENT;
+	}
+	sscanf(s, "%u%n", &out, &len);
+	s += len;
+	if (*s != '%') {
+		return INV_PERCENT;
+	}
+	return out;
 }
 
 
@@ -184,7 +204,7 @@ Scan a string for the string representation of a currency value,
 */
 Currency sscan_currency(char *in) {
 	// Copy the input str to the IO buffer
-	strncpy(io_buffer, in, MAX_BUFFER_SIZE-1);
+	strncpy(io_buffer, in, MAX_BUFFER_SIZE);
 	return s_str_to_currency();
 }
 
@@ -267,3 +287,7 @@ void print_percent(char *format, Percent percent) {
 	fprintf(stdout, format, percent);
 }
 
+Percent sscan_percent(char *in) {
+	strncpy(io_buffer, in, MAX_BUFFER_SIZE);
+	return s_str_to_percent();
+}

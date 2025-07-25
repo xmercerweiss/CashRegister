@@ -199,6 +199,15 @@ void test_sprint_percent_returns_formatted_str(void) {
 	}
 }
 
+void test_sscan_percent_returns_correct_value(void) {
+	const TestDatum *datum;
+	Percent returned;
+	for (datum = VALID_PERCENT_INPS; datum->string != NULL; datum++) {
+		returned = sscan_percent(datum->string);
+		TEST_ASSERT_EQUAL_UINT(datum->value, returned);
+	}
+}
+
 int main(void) {
 	s_init();
 	UNITY_BEGIN();
@@ -208,8 +217,10 @@ int main(void) {
 	RUN_TEST(test_sscan_currency_handles_invalid_strs);
 	RUN_TEST(test_fscan_currency_returns_correct_value);
 	// Percent IO Tests
-	RUN_TEST(test_sprint_currency_returns_formatted_str);
+	RUN_TEST(test_sprint_percent_returns_formatted_str);
+	RUN_TEST(test_sscan_percent_returns_correct_value);
 	return UNITY_END();
 }
+
 
 
