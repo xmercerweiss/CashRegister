@@ -71,9 +71,9 @@ itself was entered. ie: the input `$8.06x4` is identical to the
 input `$32.24`. All multipliers must consist of `x` or `X`
 followed by any positive whole number less than 2^64. 
 
-Currency signs are allowed, though not required, in currency inputs. Commas
-are disallowed. Additionally, scanned quantities of currency may exclude additional 
-zeros in the cents portion. While the string...
+Currency signs are allowed, though not required, in currency inputs. While commas
+are required in output, they are disallowed in input. Additionally, scanned quantities 
+of currency may exclude additional zeros in the cents portion. While the string...
 
 ```
 $200.1

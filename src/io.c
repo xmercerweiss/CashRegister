@@ -42,9 +42,9 @@ static char *s_currency_to_str(Currency amount) {
 
 // Convert the str in the IO buffer into the amount of currency it represents, if possible
 static Currency s_str_to_currency() {
-	char c, *s = io_buffer, *sym_s = CURRENCY_SYM;
+	char *s = io_buffer, *sym_s = CURRENCY_SYM;
 	int n;  
-	Currency cents, out = 0;
+	Currency out = 0;
 	// Skip whitespace
 	while (isspace(*s)) 
 		s++;
@@ -53,15 +53,31 @@ static Currency s_str_to_currency() {
 		sym_s++;
 		s++;
 	}
+	if (!isdigit(*s))
+		return INV_CURR;
 	if (sscanf(s, "%lu%n", &out, &n) > 0) {
 		out *= 100;
 		s += n;
 	}
-	if ((c = *s++) == '.') {
-		sscanf(s, "%lu%n", &cents, &n);
-		s += n;
-		out += cents;
+	if (*s == '.') {
+		s++;
+		unsigned base = 10;
+		while (isdigit(*s)) {
+			out += base * (*s++ - '0');
+			base /= 10;
+		}
 	}
+	if (tolower(*s) == 'x') {
+		s++;
+		unsigned mul = 0;
+		while (isdigit(*s)) {
+			mul *= 10;
+			mul += *s++ - '0';
+		}
+		out *= mul;
+	}
+	if (*s != '\0') 
+		return INV_CURR;
 	return out;
 }
 

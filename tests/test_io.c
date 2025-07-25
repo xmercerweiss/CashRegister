@@ -12,16 +12,16 @@
 
 
 static const TestDatum VALID_CURR_INPS[] = {
-	// Formatted output is valid input
+	// Input is valid with currency symbol and padded decimals
 	{0, "$0"},
 	{1, "$0.01"},
 	{100, "$1.00"},
 	{530, "$5.30"},
 	{537, "$5.37"},
 	{50037, "$500.37"},
-	{500037, "$5,000.37"},
-	{100500037, "$1,005,000.37"},
-	// Unformatted strings are also valid
+	{500037, "$5000.37"},
+	{100500037, "$1005000.37"},
+	// Input is valid without a currency symbol or padded decimals
 	{0, "0"},
 	{1, "0.01"},
 	{100, "1"},
@@ -30,21 +30,21 @@ static const TestDatum VALID_CURR_INPS[] = {
 	{50037, "500.37"},
 	{500037, "5000.37"},
 	{100500037, "1005000.37"},
-	// Test optional quantities
+	// Optional integer multipliers are valid
 	{0, "$0x0"},
-	{0, "$0x1"},
+	{0, "0x1"},
 	{0, "$1x0"},
-	{100, "$1x1"}, 
+	{100, "1x1"}, 
 	{200, "$2x1"},
-	{200, "$1x2"},
+	{200, "1x2"},
 	{400, "$2x2"},
-	{1000, "$5x2"},
+	{1000, "5x2"},
 	{4200, "$6x7"},
-	{100000, "$20x5"},
+	{10000, "20x5"},
 	{2721, "$9.07x3"},
-	{440, "$1.10x4"},
-	{5500, "$5.50x10"},
-	{132000, "$220x6"},
+	{440, "1.10x4"},
+	{5500, "$5.5x10"},
+	{132000, "220x6"},
 	NULL_DATUM
 };
 
@@ -66,6 +66,8 @@ static const TestDatum INVALID_CURR_INPS[] = {
 	{INV_CURR, "Goodbye7"},
 	{INV_CURR, "H7J8K9"},
 	{INV_CURR, "127.0.0.1"},
+	{INV_CURR, "$5,000.37"},
+	{INV_CURR, "$1,005,000.37"},
 	NULL_DATUM
 };
 
@@ -104,7 +106,6 @@ void test_sscan_currency_returns_correct_value(void) {
 	Currency returned;
 	for (datum = VALID_CURR_INPS; datum->string != NULL; datum++) {
 		returned = sscan_currency(datum->string);
-		printf("%s: %lu\n", datum->string, returned);
 		TEST_ASSERT_EQUAL_UINT(datum->value, returned);
 	}
 }
