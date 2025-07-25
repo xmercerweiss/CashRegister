@@ -23,7 +23,20 @@ static char io_buffer[MAX_BUFFER_SIZE];
  * Static Functions (marked with s_ prefix)
  ******/
 
-// ****** Currency IO
+// ***** Utils
+
+// Read at most n chars from file into buf; Stop at n-1, or when \0 is hit
+static int s_fscann(char *buf, size_t n, FILE *file) {
+	int i, c;
+	for (i = 0; (c = fgetc(file)) != EOF && --n > 0; i++) {
+		buf[i] = c;
+		if (c == '\0')
+			break;
+	}
+	buf[i] = '\0';
+}
+
+// ***** Currency IO
 
 // *** Prototypes
 static Currency s_get_units(char**);
@@ -128,6 +141,9 @@ Percent s_str_to_percent(void) {
 	if (!isdigit(*s)) {
 		return INV_PERCENT;
 	}
+	else if (*s == '0') {
+		return 0;
+	}
 	sscanf(s, "%u%n", &out, &len);
 	s += len;
 	if (*s != '%') {
@@ -217,11 +233,7 @@ Scan a file stream for the string representation of a currency value,
 	The currency value represented in the file stream
 */
 Currency fscan_currency(FILE *in) {
-	// Generate a format specifying the maximum length of the IO buffer
-	char meta_format[MIN_BUFFER_SIZE];
-	snprintf(meta_format, MIN_BUFFER_SIZE, "%%%ds", MAX_BUFFER_SIZE-1);
-	// Use format to read from the input stream to the IO buffer
-	fscanf(in, meta_format, &io_buffer);
+	s_fscann(io_buffer, MAX_BUFFER_SIZE, in);
 	return s_str_to_currency();
 }
 
@@ -287,7 +299,28 @@ void print_percent(char *format, Percent percent) {
 	fprintf(stdout, format, percent);
 }
 
+/*
+Scan a string for the representation of a percentage,
+	then return that percentage
+@param in
+	The string to be scanned
+@return
+	The percentage represented in the string
+*/
 Percent sscan_percent(char *in) {
 	strncpy(io_buffer, in, MAX_BUFFER_SIZE);
+	return s_str_to_percent();
+}
+
+/**
+Scan a file stream for the representation of a percentage,
+	then return that percentage
+@param in
+	The file stream to be scanned
+@return
+	The percentage represented in the file stream
+*/
+Percent fscan_percent(FILE *in) {
+	s_fscann(io_buffer, MAX_BUFFER_SIZE, in);
 	return s_str_to_percent();
 }

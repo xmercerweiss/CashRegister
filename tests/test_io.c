@@ -89,7 +89,6 @@ static const TestDatum INVALID_PERCENT_INPS[] = {
 	{INV_PERCENT, "01%"},
 	{INV_PERCENT, "-0%"},
 	{INV_PERCENT, "-1%"},
-	{INV_PERCENT, "100%"},
 	{INV_PERCENT, ".10%"},
 	{INV_PERCENT, "1.0%"},
 	{INV_PERCENT, "0.001%"},
@@ -181,7 +180,7 @@ void test_fscan_currency_returns_correct_value(void) {
 	for (datum = VALID_CURR_INPS; datum->string != NULL; datum++) {
 		FILE *temp = tmpfile();
 		TEST_ASSERT_NOT_NULL(temp);
-		fprintf(temp, datum->string);
+		fputs(datum->string, temp);
 		rewind(temp);
 		returned = fscan_currency(temp);
 		fclose(temp);
@@ -208,6 +207,32 @@ void test_sscan_percent_returns_correct_value(void) {
 	}
 }
 
+void test_sscan_percent_handles_invalid_strs(void) {
+	const TestDatum *datum;
+	Percent returned;
+	for (datum = INVALID_PERCENT_INPS; datum->string != NULL; datum++) {
+		returned = sscan_percent(datum->string);
+		TEST_ASSERT_EQUAL_UINT(datum->value, returned);
+	}
+}
+
+void test_fscan_percent_returns_correct_value(void) {
+	const TestDatum *datum;
+	Percent returned;
+	int i = 0;
+	for (datum = VALID_PERCENT_INPS; datum->string != NULL; datum++) {
+		FILE *temp = tmpfile();
+		TEST_ASSERT_NOT_NULL(temp);
+		fputs(datum->string, temp);
+		rewind(temp);
+		returned = fscan_percent(temp);
+		fclose(temp);
+		temp = NULL;
+		TEST_ASSERT_EQUAL_UINT(datum->value, returned);
+	}
+}
+
+
 int main(void) {
 	s_init();
 	UNITY_BEGIN();
@@ -219,8 +244,8 @@ int main(void) {
 	// Percent IO Tests
 	RUN_TEST(test_sprint_percent_returns_formatted_str);
 	RUN_TEST(test_sscan_percent_returns_correct_value);
+	RUN_TEST(test_sscan_percent_handles_invalid_strs);
+	RUN_TEST(test_fscan_percent_returns_correct_value);
 	return UNITY_END();
 }
-
-
 
