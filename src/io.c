@@ -22,6 +22,11 @@ static char io_buffer[MAX_BUFFER_SIZE];
  * Static Functions (marked with s_ prefix)
  */
 
+// Prototypes used by curr_to_str and str_to_curr
+static Currency s_get_units(char**);
+static Currency s_get_cents(char**);
+static unsigned s_get_multiplier(char**);
+
 // Convert an amount of currency into its str representation, then save it to the IO buffer
 static char *s_currency_to_str(Currency amount) {
 	uint64 unit_count = (uint64) (amount / 100);
@@ -43,7 +48,6 @@ static char *s_currency_to_str(Currency amount) {
 // Convert the str in the IO buffer into the amount of currency it represents, if possible
 static Currency s_str_to_currency() {
 	char *s = io_buffer, *sym_s = CURRENCY_SYM;
-	int n;  
 	Currency out = 0;
 	// Skip whitespace
 	while (isspace(*s)) 
@@ -53,31 +57,48 @@ static Currency s_str_to_currency() {
 		sym_s++;
 		s++;
 	}
-	if (!isdigit(*s))
+	if (!isdigit(*s))  // Inputs containing excess non-digits are invalid
 		return INV_CURR;
-	if (sscanf(s, "%lu%n", &out, &n) > 0) {
+	out += s_get_units(&s);
+	out += s_get_cents(&s);
+	out *= s_get_multiplier(&s);
+	if (*s != '\0')   // Inputs of excess length are invalid
+		return INV_CURR;
+	return out;
+}
+
+static Currency s_get_units(char **pstr) {
+	Currency out = 0;
+	int len;
+	if (sscanf(*pstr, "%lu%n", &out, &len) > 0) {
 		out *= 100;
-		s += n;
+		*pstr += len;
 	}
-	if (*s == '.') {
-		s++;
-		unsigned base = 10;
-		while (isdigit(*s)) {
-			out += base * (*s++ - '0');
+	return out;
+}
+
+static Currency s_get_cents(char **pstr) {
+	Currency out = 0;
+	unsigned base = 10;
+	if (**pstr == '.') {
+		(*pstr)++;
+		while (isdigit(**pstr)) {
+			out += base * (*(*pstr)++ - '0');
 			base /= 10;
 		}
 	}
-	if (tolower(*s) == 'x') {
-		s++;
-		unsigned mul = 0;
-		while (isdigit(*s)) {
-			mul *= 10;
-			mul += *s++ - '0';
-		}
-		out *= mul;
+	return out;
+}
+
+static unsigned s_get_multiplier(char** pstr) {
+	if (tolower(**pstr) != 'x')
+		return 1;  // No multiplier given 
+	(*pstr)++;
+	unsigned out = 0;
+	while (isdigit(**pstr)) {
+		out *= 10;
+		out += *(*pstr)++ - '0';
 	}
-	if (*s != '\0') 
-		return INV_CURR;
 	return out;
 }
 
@@ -151,6 +172,14 @@ Currency sscan_currency(char *in) {
 	return s_str_to_currency();
 }
 
+/**
+Scan a file stream for the string representation of a currency value,
+	then return that value
+@param in
+	The file stream to be scanned
+@return
+	The currency value represented in the file stream
+*/
 Currency fscan_currency(FILE *in) {
 	// Generate a format specifying the maximum length of the IO buffer
 	char format[MIN_BUFFER_SIZE];
